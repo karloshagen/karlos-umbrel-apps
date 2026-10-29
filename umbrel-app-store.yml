@@ -1,0 +1,2 @@
+id: "karlos" # Community store prefix. Every app id must start with this.
+name: "Karlos Apps" # Shown in the umbrelOS UI as the community app store name.

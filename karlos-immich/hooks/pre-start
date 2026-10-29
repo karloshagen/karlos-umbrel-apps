@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Create local Immich directories and the NAS library before containers start.
+# umbrelOS runs this as root. A failing hook does not cancel "compose up" by
+# itself; the NAS bind also sets create_host_path: false so Docker will not
+# invent an empty local directory when Personal-Drive is absent.
+
+set -euo pipefail
+
+APP_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")/..")"
+NAS_SHARE="${IMMICH_NAS_SHARE:-/home/umbrel/umbrel/network/UNAS-Pro-4.local/Personal-Drive}"
+NAS_LIBRARY="${IMMICH_NAS_LIBRARY:-${NAS_SHARE}/Photos/Immich}"
+DATA_ROOT="${APP_DATA_ROOT:-}"
+
+if [[ -z "${DATA_ROOT}" && -n "${APP_DATA_DIR:-}" ]]; then
+  DATA_ROOT="${APP_DATA_DIR}/data"
+fi
+
+if [[ -z "${DATA_ROOT}" || "${DATA_ROOT}" != /* ]]; then
+  echo "ERROR: APP_DATA_ROOT is not set; refusing to guess a data directory." >&2
+  exit 1
+fi
+
+install -d -o 1000 -g 1000 -m 0770 \
+  "${DATA_ROOT}/model-cache" \
+  "${DATA_ROOT}/redis" \
+  "${DATA_ROOT}/thumbs" \
+  "${DATA_ROOT}/encoded-video"
+# Postgres entrypoint runs as root and chowns this to the postgres user.
+install -d -o 0 -g 0 -m 0755 "${DATA_ROOT}/postgres"
+
+if ! mountpoint -q "${NAS_SHARE}"; then
+  echo "ERROR: NAS share is not mounted at ${NAS_SHARE}." >&2
+  echo "Mount Personal-Drive in Umbrel Files, then start Immich (NAS) again." >&2
+  echo "The library directory was not created, so a later mount will not be hidden." >&2
+  exit 1
+fi
+
+fstype="$(findmnt -n -o FSTYPE -T "${NAS_SHARE}" 2>/dev/null || true)"
+case "${fstype}" in
+  cifs | smb3 | smb2) ;;
+  *)
+    echo "ERROR: ${NAS_SHARE} is mounted as '${fstype:-unknown}', not CIFS." >&2
+    exit 1
+    ;;
+esac
+
+# Originals, profile, and backups stay on the share. Thumbs and encoded video
+# are local bind mounts over /data and are prepared above.
+mkdir -p \
+  "${NAS_LIBRARY}/upload" \
+  "${NAS_LIBRARY}/library" \
+  "${NAS_LIBRARY}/profile" \
+  "${NAS_LIBRARY}/backups"
+
+python3 "${APP_DIR}/hooks/ensure-markers.py" --uid 1000 \
+  "${NAS_LIBRARY}/upload" \
+  "${NAS_LIBRARY}/library" \
+  "${NAS_LIBRARY}/profile" \
+  "${NAS_LIBRARY}/backups" \
+  "${DATA_ROOT}/thumbs" \
+  "${DATA_ROOT}/encoded-video"
+
+echo "Immich (NAS) library is ${NAS_LIBRARY}"
+echo "Thumbnails and encoded video are under ${DATA_ROOT}"
