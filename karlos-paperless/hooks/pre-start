@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Mirror upstream paperless pre-start: 3.0.2+ needs no migration-history backfill.
+# Keep this hook so updates overwrite any old copied hook in existing app data.
+echo "karlos-paperless pre-start: media/consume on NAS; local data/pgdata/redisdata; no migration-history backfill needed"

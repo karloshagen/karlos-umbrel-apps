@@ -1,0 +1,53 @@
+manifestVersion: 1.1
+id: karlos-paperless
+storage:
+  dataRoot: data
+category: files
+name: Paperless-ngx (NAS)
+version: "3.4.2"
+tagline: Paperless-ngx with media and consume on your NAS
+description: >-
+  Paperless-ngx 3.4.2 with document media and the consume folder on the UNAS Personal-Drive share. This is a separate install from the official Umbrel Paperless app: its own database, its own port, and its own containers.
+
+
+  Scanned originals and the archive live on the SMB share Umbrel already mounts at /home/umbrel/umbrel/network/UNAS-Pro-4.local/Personal-Drive/Documents/Paperless. Drop files into the consume folder on the share; Paperless polls every 30 seconds. Postgres, Redis, and Paperless application data stay on this app's local storage.
+
+
+  Paperless-ngx is a community-supported open-source document management system that transforms your physical documents into a searchable online archive so you can keep, well, less paper.
+
+
+  - Organize and index your scanned documents with tags, correspondents, types, and more.
+
+  - Your data is stored locally on your server and is never transmitted or shared in any way.
+
+  - Performs OCR on your documents, adding searchable and selectable text, even to documents scanned with only images.
+
+  - Utilizes the open-source Tesseract engine to recognize more than 100 languages.
+
+  - Documents are saved as PDF/A format which is designed for long term storage, alongside the unaltered originals.
+
+  - Uses machine-learning to automatically add tags, correspondents and document types to your documents.
+
+  - Supports PDF documents, images, plain text files, Office documents (Word, Excel, Powerpoint, and LibreOffice equivalents) and more.
+releaseNotes: >-
+  First package of Paperless-ngx 3.4.2 for the Karlos Apps store. Media and consume are bind-mounted from Personal-Drive Documents/Paperless. Postgres, Redis, and app data stay local. The browser port is 2350 so it does not clash with the official Paperless app on 2349. Time zone is Australia/Adelaide; consumer polling is 30 seconds.
+
+
+  Upstream notes: https://github.com/paperless-ngx/paperless-ngx/releases/tag/v3.4.2
+backupIgnore:
+  - data/redisdata/*
+developer: Paperless-ngx Community
+website: https://docs.paperless-ngx.com/
+dependencies: []
+repo: https://github.com/paperless-ngx/paperless-ngx
+support: https://github.com/paperless-ngx/paperless-ngx/discussions
+port: 2350
+gallery:
+  - https://getumbrel.github.io/umbrel-apps-gallery/paperless/1.jpg
+  - https://getumbrel.github.io/umbrel-apps-gallery/paperless/2.jpg
+  - https://getumbrel.github.io/umbrel-apps-gallery/paperless/3.jpg
+path: ""
+defaultUsername: "admin"
+deterministicPassword: true
+icon: https://getumbrel.github.io/umbrel-apps-gallery/paperless/icon.svg
+submitter: karloshagen

@@ -1,0 +1,82 @@
+version: "3.7"
+
+# Project and container names stay off the official "paperless_*" app so both can run.
+name: karlos-paperless
+
+services:
+  app_proxy:
+    container_name: karlos-paperless_app_proxy_1
+    environment:
+      # Browser port is 2350 (umbrel-app.yml). Paperless itself still listens on 8000.
+      APP_HOST: karlos-paperless_webserver_1
+      APP_PORT: 8000
+      PROXY_AUTH_ADD: "false"
+
+  broker:
+    container_name: karlos-paperless_broker_1
+    image: docker.io/library/redis:7@sha256:d6ecc832969a4827645a083da38345327b3447772fe907e7d4311c79b4e3a06e
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data/redisdata:/data
+
+  db:
+    container_name: karlos-paperless_db_1
+    image: docker.io/library/postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+
+  webserver:
+    container_name: karlos-paperless_webserver_1
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.4.2@sha256:d704e84f88300eb6ab001ab15720a2330ff99169cf9f94d6b8fcc44b63a84c84
+    restart: on-failure
+    depends_on:
+      - db
+      - broker
+      - gotenberg
+      - tika
+    volumes:
+      - ${APP_DATA_DIR}/data/data:/usr/src/paperless/data
+      - type: bind
+        source: ${PAPERLESS_NAS_MEDIA:-/home/umbrel/umbrel/network/UNAS-Pro-4.local/Personal-Drive/Documents/Paperless/media}
+        target: /usr/src/paperless/media
+        bind:
+          create_host_path: false
+      - ${APP_DATA_DIR}/data/export:/usr/src/paperless/export
+      - type: bind
+        source: ${PAPERLESS_NAS_CONSUME:-/home/umbrel/umbrel/network/UNAS-Pro-4.local/Personal-Drive/Documents/Paperless/consume}
+        target: /usr/src/paperless/consume
+        bind:
+          create_host_path: false
+    environment:
+      PAPERLESS_REDIS: redis://karlos-paperless_broker_1:6379
+      PAPERLESS_DBHOST: karlos-paperless_db_1
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://karlos-paperless_gotenberg_1:3000
+      PAPERLESS_TIKA_ENDPOINT: http://karlos-paperless_tika_1:9998
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: $APP_PASSWORD
+      PAPERLESS_SECRET_KEY: $APP_SEED
+      PAPERLESS_CONSUMER_POLLING: 30
+      PAPERLESS_TIME_ZONE: Australia/Adelaide
+
+  gotenberg:
+    container_name: karlos-paperless_gotenberg_1
+    image: docker.io/gotenberg/gotenberg:7.10@sha256:d03b8a04c6e6c5e568b38f57352266dee4674849b71818774025f8f48d869a9a
+    restart: on-failure
+
+    # The gotenberg chromium route is used to convert .eml files. We do not
+    # want to allow external content like tracking pixels or even javascript.
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+  tika:
+    container_name: karlos-paperless_tika_1
+    image: apache/tika:3.3.1.0@sha256:90b7fa1dc018434075fce9e1d9b88b1e3d0ea6979d0cf86e116c79a8073ae973
+    restart: on-failure
