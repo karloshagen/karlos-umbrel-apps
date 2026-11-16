@@ -18,7 +18,7 @@ Removing the store does not uninstall apps that came from it.
 
 ## Immich (NAS)
 
-`karlos-immich` is Immich v3.3.5, packaged separately from the official Umbrel Immich app so both can be installed.
+`karlos-immich` is Immich v3.4.1, packaged separately from the official Umbrel Immich app so both can be installed.
 
 | | Official Immich | Immich (NAS) |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ On first start the pre-start hook creates `Photos/Immich` on that share when the
 
 Immich's own guide mounts a NAS at `/data` and then bind-mounts `/data/thumbs` and `/data/encoded-video` from local disk. `upload/` and `library/` stay on the same NAS mount; Immich advises against splitting those two. The server container still listens on port 2283. umbrelOS publishes the app on port 2284.
 
-GPU access is the same manifest permission as the official app (`permissions: [GPU]`). umbrelOS injects `/dev/dri` (and any other acceleration it finds) into the containers. Image digests are pinned to Immich v3.3.5.
+GPU access is the same manifest permission as the official app (`permissions: [GPU]`). umbrelOS injects `/dev/dri` (and any other acceleration it finds) into the containers. Image digests are pinned to Immich v3.4.1.
 
 Postgres uses the same local-only password as the official Umbrel Immich compose file. It is not a new credential and it is not exposed outside the app network. The UI login is the admin account created in Immich's first-run setup. `JWT_SECRET` comes from the per-app Umbrel seed.
 

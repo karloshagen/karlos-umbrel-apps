@@ -12,10 +12,10 @@ folderAccess:
         readOnly: true
 category: files
 name: Immich (NAS)
-version: "v3.3.5"
+version: "v3.4.1"
 tagline: Immich with originals on your NAS
 description: >-
-  Immich v3.3.5 with the upload library on the UNAS Personal-Drive share. This is a separate install from the official Umbrel Immich app: its own database, its own port, and its own containers.
+  Immich v3.4.1 with the upload library on the UNAS Personal-Drive share. This is a separate install from the official Umbrel Immich app: its own database, its own port, and its own containers.
 
 
   Original photos and videos are stored on the SMB share Umbrel already mounts at /home/umbrel/umbrel/network/UNAS-Pro-4.local/Personal-Drive/Photos/Immich. Postgres, Redis, the machine-learning model cache, thumbnails, and transcoded video stay on this app's local storage.
@@ -58,10 +58,7 @@ description: >-
 
   - User-defined storage structure
 releaseNotes: >-
-  First package of Immich v3.3.5 for the Karlos Apps store. The upload library is bind-mounted from the Personal-Drive Photos/Immich folder. Thumbnails (/data/thumbs) and encoded video (/data/encoded-video) use local app storage, which is the split Immich documents for a NAS library. Postgres, Redis, and the ML model cache stay local. The browser port is 2284 so it does not clash with the official Immich app on 2283.
-
-
-  Upstream notes: https://github.com/immich-app/immich/releases/tag/v3.3.5
+  Update from v3.3.5 to v3.4.1, which includes the v3.4.0 feature release. Security fixes covering shared links, OAuth cookies, and a tighter Content Security Policy. Mobile tags, JPEG XL support, workflow OCR triggers and filters, and faster shared links. Bug fixes. No breaking changes listed. Upstream notes: https://github.com/immich-app/immich/releases/tag/v3.4.0 and https://github.com/immich-app/immich/releases/tag/v3.4.1
 developer: Alex Tran
 website: https://www.immich.app
 dependencies: []
